@@ -8,24 +8,24 @@ internal class CleaNight
     internal static async Task Main(string[] _)
     {
         string repo = "Light2k4/CleaNight";
-        string latestReleaseInfo = await GetLatestReleaseInfo(repo);
-        Console.WriteLine(latestReleaseInfo);
+        var latestReleaseInfo = await GetLatestReleaseInfo(repo);
+        string latestVersion = latestReleaseInfo.Item1;
+        string versionType = latestReleaseInfo.Item2;
 
         string ascii = @"
 
-             ██████╗██╗     ███████╗ █████╗ ███╗   ██╗██╗ ██████╗ ██╗  ██╗████████╗
-            ██╔════╝██║     ██╔════╝██╔══██╗████╗  ██║██║██╔════╝ ██║  ██║╚══██╔══╝
-            ██║     ██║     █████╗  ███████║██╔██╗ ██║██║██║  ███╗███████║   ██║   
-            ██║     ██║     ██╔══╝  ██╔══██║██║╚██╗██║██║██║   ██║██╔══██║   ██║   
-            ╚██████╗███████╗███████╗██║  ██║██║ ╚████║██║╚██████╔╝██║  ██║   ██║   
-             ╚═════╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
+                         ██████╗██╗     ███████╗ █████╗ ███╗   ██╗██╗ ██████╗ ██╗  ██╗████████╗
+                        ██╔════╝██║     ██╔════╝██╔══██╗████╗  ██║██║██╔════╝ ██║  ██║╚══██╔══╝
+                        ██║     ██║     █████╗  ███████║██╔██╗ ██║██║██║  ███╗███████║   ██║   
+                        ██║     ██║     ██╔══╝  ██╔══██║██║╚██╗██║██║██║   ██║██╔══██║   ██║   
+                        ╚██████╗███████╗███████╗██║  ██║██║ ╚████║██║╚██████╔╝██║  ██║   ██║   
+                         ╚═════╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
                                                                        
 ";
 
-        string getVersionLocal = "1.0.0";
-        string getVersionGithub = latestReleaseInfo.Split(' ')[4];
+        string getVersionLocal = "1.0.1";
 
-        string header = ascii + "\n" + "Version: " + getVersionLocal + "      Last version: " + getVersionGithub + "\n\n";
+        string header = ascii + "\n" + "                            Current Version: " + getVersionLocal + "      Last version: " + latestVersion + " (" + versionType + ")" + "\n\n";
 
         Console.Title = "CleaNight - github.com/Light2k4/CleaNight";
         Console.ForegroundColor = ConsoleColor.Green;
@@ -40,10 +40,11 @@ internal class CleaNight
         {
             if (afficherMenu)
             {
-                Console.WriteLine("1. Supprimer les dossiers temporaires");
-                Console.WriteLine("2. Rejoindre le serveur Discord");
-                Console.WriteLine("3. Quitter");
-                Console.Write("\nVotre choix : ");
+                Console.WriteLine("1. Run CleaNight");
+                Console.WriteLine("2. Discord");
+                Console.WriteLine("3. Github");
+                Console.WriteLine("4. Quit");
+                Console.Write("\nSelect an option [1-4]:");
             }
 
             string choix = Console.ReadLine();
@@ -63,6 +64,14 @@ internal class CleaNight
                     afficherMenu = false;
                     break;
                 case "3":
+                    System.Diagnostics.Process.Start("https://github.com/light2k4/CleaNight");
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.WriteLine(header);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    afficherMenu = false;
+                    break;
+                case "4":
                     continuer = false;
                     Console.WriteLine("Bye...");
                     await Task.Delay(1000);
@@ -70,7 +79,7 @@ internal class CleaNight
                     break;
 
                 default:
-                    Console.WriteLine("Choix invalide.");
+                    Console.WriteLine("Invalid choice.");
                     await Task.Delay(1000);
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Magenta;
@@ -82,7 +91,7 @@ internal class CleaNight
         }
     }
 
-    private static async Task<string> GetLatestReleaseInfo(string repo)
+    private static async Task<Tuple<string, string>> GetLatestReleaseInfo(string repo)
     {
         using (HttpClient client = new HttpClient())
         {
@@ -99,23 +108,23 @@ internal class CleaNight
                 string tagName = (string)root["tag_name"];
                 bool preRelease = (bool)root["prerelease"];
 
-                string versionType = preRelease ? "version Dev (pre release)" : "version Stable (release)";
-                return $"La dernière version est {tagName} et c'est une {versionType}.";
+                string versionType = preRelease ? "Dev build" : "Stable build";
+                return new Tuple<string, string>(tagName, versionType);
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine("Message :{0} ", e.Message);
-                return "Impossible de récupérer les informations de la dernière version.";
+                return new Tuple<string, string>("Could not retrieve version", "Unknown");
             }
         }
     }
 
     private static async void SupprimerDossiers(string header)
     {
-        bool confirmation = DemanderConfirmation("Êtes-vous sûr de vouloir supprimer les dossiers temporaires ?");
+        bool confirmation = DemanderConfirmation("Are you sure you want to delete all temp folders?");
         if (!confirmation)
         {
-            Console.WriteLine("Suppression annulée.");
+            Console.WriteLine("Operation cancelled.");
             return;
         }
 
@@ -123,7 +132,7 @@ internal class CleaNight
         Console.ForegroundColor = ConsoleColor.Magenta;
         Console.WriteLine(header);
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Suppression des dossiers en cours...");
+        Console.WriteLine("Deleting temp folders...\n");
 
         string[] dossiers = Directory.GetDirectories(@"C:\Users\" + Environment.UserName + @"\AppData\Local\Temp");
 
@@ -135,14 +144,14 @@ internal class CleaNight
             }
             catch (Exception e)
             {
-                Console.WriteLine("Erreur lors de la suppression du dossier " + dossier + ": " + e.Message);
+                Console.WriteLine("Error deleting folder " + dossier + ": " + e.Message);
             }
         }
 
-        Console.WriteLine("\n\nSuppression terminée.");
-        Console.WriteLine("1. Laissez un avis");
-        Console.WriteLine("2. Quitter");
-        Console.Write("\nVotre choix : ");
+        Console.WriteLine("\n\nAll temp folders have been deleted.\n\n");
+        Console.WriteLine("1. Leave a star on Github");
+        Console.WriteLine("2. Quit");
+        Console.Write("\nSelect an option [1-2] : ");
         string choixEnd = Console.ReadLine();
 
         switch (choixEnd)
@@ -158,7 +167,7 @@ internal class CleaNight
                 Environment.Exit(0);
                 break;
             default:
-                Console.WriteLine("Choix invalide. \nBye...");
+                Console.WriteLine("Invalid choice. \nBye...");
                 await Task.Delay(1000);
                 Environment.Exit(0);
                 break;
@@ -167,8 +176,8 @@ internal class CleaNight
 
     private static bool DemanderConfirmation(string message)
     {
-        Console.Write($"{message} (O/N): ");
+        Console.Write($"{message} (Y/N): ");
         string reponse = Console.ReadLine();
-        return reponse.Equals("O", StringComparison.OrdinalIgnoreCase);
+        return reponse.Equals("Y", StringComparison.OrdinalIgnoreCase);
     }
 }
