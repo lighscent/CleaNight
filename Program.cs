@@ -23,7 +23,7 @@ internal class CleaNight
                                                                        
 ";
 
-        string getVersionLocal = "1.0.1";
+        string getVersionLocal = "1.0.2";
 
         string header = ascii + "\n" + "                            Current Version: " + getVersionLocal + "      Last version: " + latestVersion + " (" + versionType + ")" + "\n\n";
 
@@ -134,17 +134,37 @@ internal class CleaNight
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Deleting temp folders...\n");
 
-        string[] dossiers = Directory.GetDirectories(@"C:\Users\" + Environment.UserName + @"\AppData\Local\Temp");
+        // Définition des répertoires à nettoyer
+        string[] cleanupDirs = new string[]
+        {
+        Environment.GetEnvironmentVariable("WinDir") + @"\Temp",
+        Environment.GetEnvironmentVariable("WinDir") + @"\Prefetch",
+        Environment.GetEnvironmentVariable("Temp"),
+        Environment.GetEnvironmentVariable("AppData") + @"\Local\Temp",
+        Environment.GetEnvironmentVariable("LocalAppData") + @"\Temp",
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\AppData\Local\Microsoft\Windows\INetCache",
+        Environment.GetEnvironmentVariable("SYSTEMDRIVE") + @"\AMD",
+        Environment.GetEnvironmentVariable("SYSTEMDRIVE") + @"\NVIDIA",
+        Environment.GetEnvironmentVariable("SYSTEMDRIVE") + @"\INTEL"
+        };
 
-        foreach (string dossier in dossiers)
+        foreach (string dossier in cleanupDirs)
         {
             try
             {
-                Directory.Delete(dossier, true);
+                if (Directory.Exists(dossier))
+                {
+                    Directory.Delete(dossier, true);
+                    Console.WriteLine($"Deleted: {dossier}");
+                }
+                else
+                {
+                    Console.WriteLine($"Not found: {dossier}");
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error deleting folder " + dossier + ": " + e.Message);
+                Console.WriteLine($"Error deleting folder {dossier}: {e.Message}");
             }
         }
 
@@ -173,6 +193,7 @@ internal class CleaNight
                 break;
         }
     }
+
 
     private static bool DemanderConfirmation(string message)
     {
