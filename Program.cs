@@ -27,6 +27,8 @@ internal class CleaNight
 
         string header = ascii + "\n" + "                            Current Version: " + getVersionLocal + "      Last version: " + latestVersion + " (" + versionType + ")" + "\n\n";
 
+        CheckAdminRights(header);
+
         Console.Title = "CleaNight - github.com/Light2k4/CleaNight";
         Console.ForegroundColor = ConsoleColor.Green;
 
@@ -90,6 +92,20 @@ internal class CleaNight
             }
         }
     }
+
+    private static void CheckAdminRights(string header)
+    {
+        if (!new System.Security.Principal.WindowsPrincipal(System.Security.Principal.WindowsIdentity.GetCurrent()).IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator))
+        {
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine(header);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Please run this program as an administrator.");
+            Environment.Exit(0);
+        }
+    }
+
+
 
     private static async Task<Tuple<string, string>> GetLatestReleaseInfo(string repo)
     {
