@@ -101,6 +101,8 @@ internal class CleaNight
             Console.WriteLine(header);
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Please run this program as an administrator.");
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
             Environment.Exit(0);
         }
     }
