@@ -172,8 +172,15 @@ internal class CleaNight
             {
                 if (Directory.Exists(dossier))
                 {
+                    // Log each file before deleting the directory
+                    string[] files = Directory.GetFiles(dossier, "*", SearchOption.AllDirectories);
+                    foreach (string file in files)
+                    {
+                        Console.WriteLine($"Deleting file: {file}");
+                    }
+
                     Directory.Delete(dossier, true);
-                    Console.WriteLine($"Deleted: {dossier}");
+                    Console.WriteLine($"Deleted directory: {dossier}");
                 }
                 else
                 {
@@ -211,6 +218,7 @@ internal class CleaNight
                 break;
         }
     }
+
 
 
     private static bool DemanderConfirmation(string message)
